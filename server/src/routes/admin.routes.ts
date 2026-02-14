@@ -4,6 +4,13 @@ import { requireRole } from "../middlewares/role";
 import { validate } from "../middlewares/validate";
 import { z } from "zod";
 import { createPlan, listPlans } from "../controllers/admin.controller";
+import { listUsers, approveUser, addMemberToPlan, listPlanMembers } from "../controllers/member.controller";
+import { generateCyclesForPlan, listCyclesForPlan } from "../controllers/cycle.controller";
+import { listPayments, approvePayment, rejectPayment } from "../controllers/payment.controller";
+
+
+
+
 
 const router = Router();
 
@@ -18,9 +25,41 @@ const planSchema = z.object({
   })
 });
 
+
 router.use(auth, requireRole("ADMIN"));
 
 router.get("/plans", listPlans);
 router.post("/plans", validate(planSchema), createPlan);
+
+const addMemberSchema = z.object({
+  body: z.object({
+    userId: z.string().min(10)
+  })
+});
+
+// Users
+router.get("/users", listUsers);
+router.patch("/users/:userId/approve", approveUser);
+
+// Plan members
+router.post("/plans/:planId/members", validate(addMemberSchema), addMemberToPlan);
+router.get("/plans/:planId/members", listPlanMembers);
+
+router.post("/plans/:planId/cycles/generate", generateCyclesForPlan);
+router.get("/plans/:planId/cycles", listCyclesForPlan);
+
+const rejectSchema = z.object({
+  body: z.object({
+    reason: z.string().min(3)
+  })
+});
+
+
+router.get("/payments", listPayments);
+router.patch("/payments/:paymentId/approve", approvePayment);
+router.patch("/payments/:paymentId/reject", validate(rejectSchema), rejectPayment);
+
+
+
 
 export default router;

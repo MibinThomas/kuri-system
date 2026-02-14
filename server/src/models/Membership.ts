@@ -17,6 +17,11 @@ const MembershipSchema = new Schema<IMembership>(
   { timestamps: true }
 );
 
-MembershipSchema.index({ userId: 1, planId: 1 }, { unique: true });
+// Enforce only ONE active membership per user (partial unique index)
+MembershipSchema.index(
+  { userId: 1, isActive: 1 },
+  { unique: true, partialFilterExpression: { isActive: true } }
+);
+
 
 export const Membership = model<IMembership>("Membership", MembershipSchema);
