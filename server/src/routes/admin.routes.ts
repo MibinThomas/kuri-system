@@ -7,6 +7,8 @@ import { createPlan, listPlans } from "../controllers/admin.controller";
 import { listUsers, approveUser, addMemberToPlan, listPlanMembers } from "../controllers/member.controller";
 import { generateCyclesForPlan, listCyclesForPlan } from "../controllers/cycle.controller";
 import { listPayments, approvePayment, rejectPayment } from "../controllers/payment.controller";
+import { runDraw, confirmDraw, updateWinner, listDraws } from "../controllers/draw.controller";
+
 
 
 
@@ -58,6 +60,28 @@ const rejectSchema = z.object({
 router.get("/payments", listPayments);
 router.patch("/payments/:paymentId/approve", approvePayment);
 router.patch("/payments/:paymentId/reject", validate(rejectSchema), rejectPayment);
+
+
+const runDrawSchema = z.object({
+  body: z.object({
+    planId: z.string().min(10),
+    cycleId: z.string().min(10)
+  })
+});
+
+const updateWinnerSchema = z.object({
+  body: z.object({
+    newWinnerUserId: z.string().min(10),
+    reason: z.string().min(3)
+  })
+});
+
+
+router.get("/draws", listDraws);
+router.post("/draws/run", validate(runDrawSchema), runDraw);
+router.post("/draws/:drawId/confirm", confirmDraw);
+router.patch("/draws/:drawId/update-winner", validate(updateWinnerSchema), updateWinner);
+
 
 
 
